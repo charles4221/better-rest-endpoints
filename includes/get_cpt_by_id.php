@@ -68,7 +68,11 @@ function bre_build_single_cpt_endpoints() {
                 if( get_object_taxonomies($cpt) ){
                   $cpt_taxonomies = get_object_taxonomies($cpt, 'names');
 
-                  $bre_cpt_post->terms = get_the_terms(get_the_ID(), $cpt_taxonomies);
+                  $bre_cpt_post->terms = array();
+
+                  foreach ($cpt_taxonomies as $cpt_taxonomy) {
+                    array_push($bre_cpt_post->terms, get_the_terms(get_the_ID(), $cpt_taxonomy));
+                  }
 
                 } else {
                   $bre_cpt_post->terms = array();
