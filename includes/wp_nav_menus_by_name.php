@@ -1,6 +1,6 @@
 <?php
 /**
- * Get WordPress Nav Menus
+ * Get WordPress Nav Menus By Name
  *
  * @param N/A
  * @return object|null Return wp_nav_menu object,  * or null if none.
@@ -35,9 +35,9 @@ function bre_get_menus() {
       $items->target = $menu_item->target;
       $items->description = $menu_item->description;
       $items->classes = $menu_item->classes;
-	  $items->menu_item_parent = $menu_item->menu_item_parent;
-	  $items->object = $menu_item->object;
-	  $items->object_id = $menu_item->object_id;
+      $items->menu_item_parent = $menu_item->menu_item_parent;
+      $items->object = $menu_item->object;
+      $items->object_id = $menu_item->object_id;
 
       array_push($slim_menu_items, $items);
     }

@@ -132,6 +132,31 @@ Returns a JSON response with the following:
 - title
 - Yoast SEO fields, if applicable
 
+### Post by slug
+**`better-rest-endpoints/v1/page/{slug|path}`**
+Get a page by slug or path. Requesting a page by slug will only return a page with no parent with the requested slug. If multiple pages have the same slug the page needs to be requested by passing the entire path. eg. `better-rest-endpoints/v1/page/technology/about` or `better-rest-endpoints/v1/page/services/about` instead of just `better-rest-endpoints/v1/page/about`
+
+Accepts the following parameters:
+
+- slug, path (string)
+
+Returns a JSON response with the following:
+
+- ACF fields, if applicable
+- all possible thumbnail sizes & URLs
+- Author, user_nicename, & Author ID
+- Categories
+- Category IDs
+- content
+- date (ISO 8601)
+- excerpt
+- id
+- slug
+- Tag IDs
+- Tags
+- title
+- Yoast SEO fields, if applicable
+
 ### Custom Post Type Collection
 **`better-rest-endpoints/v1/{custom_post_type}`**
 Gets a collection of posts from a custom post type. Accepts the following parameters:
@@ -226,11 +251,27 @@ Returns the following JSON Response:
 - title
 - Yoast SEO Fields, if applicable
 
-### Menus
+### Menus from slug (name)
 **`better-rest-endpoints/v1/menus/{menu-slug}`**
 Gets a WordPress Menu by slug. Accepts no parameters.
 
 Returns the following JSON Response in each item object:
+
+- classes (array)
+- description
+- ID
+- menu item parent
+- menu_order
+- slug
+- target
+- title
+- url
+
+### Menus from location (theme location)
+**`better-rest-endpoints/v1/menus/{menu-slug}`**
+Gets a WordPress Menu by the theme location. Accepts no parameters.
+
+Returns an empty array if the location can not be found or if it has no assigned menu. Returns an array of the following objects if a menu is assigned to the specified location:
 
 - classes (array)
 - description
