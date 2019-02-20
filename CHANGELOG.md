@@ -9,6 +9,24 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 n/a
 
+## [1.5.2] - 2019-02-12
+
+### Fixed
+
+- SVN Version
+
+## [1.5.1] - 2019-02-12
+
+### Fixed
+
+- SVN Version
+
+## [1.5.0] - 2019-02-11
+
+### Added
+
+- Endpoint to get menu by location
+
 ## [1.4.1] - 2019-01-23
 
 ### Added
