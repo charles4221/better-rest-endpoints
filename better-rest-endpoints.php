@@ -3,9 +3,9 @@
 Plugin Name:  Better Rest Endpoints
 Plugin URI:   https://github.com/factor1/better-rest-endpoints/
 Description:  Serves up slimmer WordPress Rest API endpoints, with some great enhancements.
-Version:      1.4.1
-Author:       Eric Stout, Factor1 Studios
-Author URI:   https://factor1studios.com/
+Version:      1.5.2
+Author:       Eric Stout
+Author URI:   https://ericwstout.com/
 License:      GPL3
 License URI:  https://www.gnu.org/licenses/gpl-3.0.html
 Text Domain:  better-rest-endpoints
@@ -107,8 +107,11 @@ class F1_Better_Rest_Endpoints {
 		// get custom post type by slug
 		include_once self::$plugin_dir . 'includes/get_cpt_by_slug.php';
 
-    // get custom post type by id
-		include_once self::$plugin_dir . 'includes/wp_nav_menus.php';
+    	// get menus by menu name
+		include_once self::$plugin_dir . 'includes/wp_nav_menus_by_name.php';
+
+    	// get menus by menu location
+		include_once self::$plugin_dir . 'includes/wp_nav_menus_by_location.php';
 
 		// get custom taxonomies
 		include_once self::$plugin_dir . 'includes/get_tax.php';
