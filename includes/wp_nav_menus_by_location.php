@@ -29,6 +29,8 @@ function get_menus_by_location( WP_REST_Request $request ) {
         $items->description = $row->description;
         $items->classes = $row->classes;
         $items->menu_item_parent = $row->menu_item_parent;
+		$items->object = $row->object;
+		$items->object_id = $row->object_id;
 
         return $items;
     }, $menu);
