@@ -18,6 +18,7 @@ function deep_modify_acf_post_objects( &$item, $key ) {
 			'excerpt' => $item->post_excerpt,
 			'permalink' => get_the_permalink( $item->ID ),
 			'image' => get_the_post_thumbnail( $item, 'full' ),
+			'date' => get_the_date('c', $item->ID),
 		);
 	}
 }
