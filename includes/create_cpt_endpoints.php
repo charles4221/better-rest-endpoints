@@ -146,6 +146,26 @@ function bre_build_cpt_endpoints() {
                   }
                 }
 
+				/**
+				 * Get Breadcrumbs if Breadcrumb NavXT is activated.
+				 */
+				if ( class_exists( 'breadcrumb_navxt' ) ) {
+					$breadRequest = new WP_REST_Request( 'GET', '/bcn/v1/post/' . get_the_ID() );
+					$breadResponse = rest_do_request( $breadRequest );
+
+					if ( $breadResponse->is_error() ) {
+						// Convert to a WP_Error object.
+						$error = $breadResponse->as_error();
+						$message = $breadResponse->get_error_message();
+						$error_data = $breadResponse->get_error_data();
+						$status = isset( $error_data['status'] ) ? $error_data['status'] : 500;
+						wp_die( printf( '<p>An error occurred: %s (%d)</p>', $message, $error_data ) );
+					}
+
+					$breadData = $breadResponse->jsonSerialize();
+					$bre_post->breadcrumbs = $breadData;
+				}
+
                 // Push the post to the main $post array
                 array_push($posts, $bre_post);
             	}
