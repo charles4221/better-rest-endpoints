@@ -122,7 +122,7 @@ function bre_get_search( WP_REST_Request $request ) {
       if ( $acf === null || $show_acf === true ) {
         $bre_post->acf = bre_get_acf();
       } elseif ( $bre_post->type === 'event' ) {
-        $bre_post->acf = bre_get_acf()->event_header;
+        $bre_post->acf = get_field('event_header');
       }
 
       /*
