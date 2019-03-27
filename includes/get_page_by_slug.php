@@ -7,142 +7,126 @@
  * @since 0.0.1
  */
 
-function get_page_by_slug( WP_REST_Request $request ){
+function get_page_by_slug( WP_REST_Request $request ) {
 
-    $page_slug = $request['slug'];
+	$page_slug = $request['slug'];
 
-    // WP_Query arguments
-    if(strpos($page_slug, '/') === false){
-        $args = array(
-            'post_type' => 'page',
-            'name' => $page_slug,
-            'post_parent' => 0
-        );
-    } else {
-        $page = get_page_by_path($page_slug);
-        $args = array(
-            'page_id' => $page->ID
-        );
-    }
+	// WP_Query arguments
+	if ( strpos( $page_slug, '/' ) === false ) {
+		$args = array(
+			'post_type' => 'page',
+			'name' => $page_slug,
+			'post_parent' => 0,
+		);
+	} else {
+		$page = get_page_by_path( $page_slug );
+		$args = array(
+			'page_id' => $page->ID,
+		);
+	}
 
+	// The Query
+	$query = new WP_Query( $args );
 
+	// The Loop
+	if ( $query->have_posts() ) {
+		while ( $query->have_posts() ) {
+			$query->the_post();
 
-    // The Query
-    $query = new WP_Query( $args );
+			global $post;
 
-    // The Loop
-    if ( $query->have_posts() ) {
-    	while ( $query->have_posts() ) {
-    		$query->the_post();
+			// better WordPress endpoint post object
+			$bre_page = new stdClass();
 
-        global $post;
+			$permalink = get_permalink();
+			$bre_page->id = get_the_ID();
+			$bre_page->title = get_the_title();
+			$bre_page->slug = $post->post_name;
+			$bre_page->permalink = $permalink;
 
-        // better wordpress endpoint post object
-        $bre_post = new stdClass();
+			/*
+			*
+			* return template name
+			*
+			*/
+			if ( get_page_template() ) {
+				// strip file extension to return just the name of the template
+				$template_name = preg_replace( '/\\.[^.\\s]{3,4}$/', '', basename( get_page_template() ) );
 
-        $permalink = get_permalink();
-        $bre_post->id = get_the_ID();
-        $bre_post->title = get_the_title();
-        $bre_post->slug = $post->post_name;
-        $bre_post->permalink = $permalink;
-        $bre_post->date = get_the_date('c');
-        $bre_post->date_modified = get_the_modified_date('c');
-        $bre_post->excerpt = get_the_excerpt();
-        $bre_post->content = apply_filters('the_content', get_the_content());
-        $bre_post->author = esc_html__(get_the_author(), 'text_domain');
-        $bre_post->author_id = get_the_author_meta('ID');
-        $bre_post->author_nicename = get_the_author_meta('user_nicename');
+				$bre_page->template = $template_name;
 
-        /*
-         *
-         * get category data using get_the_category()
-         *
-         */
-        $categories = get_the_category();
+			} else {
+				$bre_page->template = 'default';
+			}
 
-        $bre_categories = [];
-        $bre_category_ids = [];
+			$bre_page->content = apply_filters( 'the_content', get_the_content() );
 
-        if( !empty($categories) ){
-          foreach ($categories as $key => $category) {
-            array_push($bre_category_ids, $category->term_id);
-            array_push($bre_categories, $category->cat_name);
-          }
-        }
+			/*
+			*
+			* return parent slug if it exists
+			*
+			*/
+			$parents = get_post_ancestors( $post->ID );
+			/* Get the top Level page->ID count base 1, array base 0 so -1 */
+			$id = ($parents) ? $parents[ count( $parents ) - 1 ] : $post->ID;
+			/* Get the parent and set the $class with the page slug (post_name) */
+			$parent = get_post( $id );
+			$bre_page->parent = $parent->post_name != $post->post_name ? $parent->post_name : false;
 
-        $bre_post->category_ids = $bre_category_ids;
-        $bre_post->category_names = $bre_categories;
+			/*
+			*
+			* return acf fields if they exist
+			*
+			*/
+			$bre_page->acf = bre_get_acf();
 
-        /*
-         *
-         * get tag data using get_the_tags()
-         *
-         */
-        $tags = get_the_tags();
+			/*
+			*
+			* return Yoast SEO fields if they exist
+			*
+			*/
+			$bre_page->yoast = bre_get_yoast( $bre_page->id );
 
-        $bre_tags = [];
-        $bre_tag_ids = [];
+			/*
+			*
+			* get possible thumbnail sizes and urls
+			*
+			*/
+			$thumbnail_names = get_intermediate_image_sizes();
+			$bre_thumbnails = new stdClass();
 
-        if( !empty($tags) ){
-          foreach ($tags as $key => $tag) {
-            array_push($bre_tag_ids, $tag->term_id);
-            array_push($bre_tags, $tag->name);
-          }
-        }
+			if ( has_post_thumbnail() ) {
+				foreach ( $thumbnail_names as $key => $name ) {
+					$bre_thumbnails->$name = esc_url( get_the_post_thumbnail_url( $post->ID, $name ) );
+				}
 
-        $bre_post->tag_ids = $bre_tag_ids;
-        $bre_post->tag_names = $bre_tags;
+				$bre_page->media = $bre_thumbnails;
+			} else {
+				$bre_page->media = false;
+			}
 
-        /*
-         *
-         * return acf fields if they exist
-         *
-         */
-        $bre_post->acf = bre_get_acf();
+			// Push the post to the main $post array
+			return $bre_page;
 
-        /*
-         *
-         * return Yoast SEO fields if they exist
-         *
-         */
-        $bre_post->yoast = bre_get_yoast( $bre_post->id );
+		}
+	} else {
+		// no posts found
+		$bre_page = [];
 
-        /*
-         *
-         * get possible thumbnail sizes and urls
-         *
-         */
-        $thumbnail_names = get_intermediate_image_sizes();
-        $bre_thumbnails = new stdClass();
+		return $bre_page;
+	}
 
-        if( has_post_thumbnail() ){
-          foreach ($thumbnail_names as $key => $name) {
-            $bre_thumbnails->$name = esc_url(get_the_post_thumbnail_url($post->ID, $name));
-          }
+	// Restore original Post Data
+	wp_reset_postdata();
+}
 
-          $bre_post->media = $bre_thumbnails;
-        } else {
-          $bre_post->media = false;
-        }
-
-        // Push the post to the main $post array
-        return $bre_post;
-
-    	}
-    } else {
-    	// no posts found
-      $bre_post = [];
-
-      return $bre_post;
-    }
-
-    // Restore original Post Data
-    wp_reset_postdata();
-  }
-
-  add_action( 'rest_api_init', function () {
-    register_rest_route( 'better-rest-endpoints/v1', '/page/(?P<slug>\S+)', array(
-      'methods' => 'GET',
-      'callback' => 'get_page_by_slug',
-    ) );
-  } );
+  add_action(
+	  'rest_api_init', function () {
+		register_rest_route(
+			'better-rest-endpoints/v1', '/page/(?P<slug>\S+)', array(
+				'methods' => 'GET',
+				'callback' => 'get_page_by_slug',
+			)
+		);
+	  }
+  );
