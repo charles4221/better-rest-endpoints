@@ -84,15 +84,21 @@ function bre_get_pages( WP_REST_Request $request ) {
 
 			/*
 			*
-			* return parent slug if it exists
+			* return parents if they exist
 			*
 			*/
-			$parents = get_post_ancestors( $post->ID );
-			/* Get the top Level page->ID count base 1, array base 0 so -1 */
-			$id = ($parents) ? $parents[ count( $parents ) - 1 ] : $post->ID;
-			/* Get the parent and set the $class with the page slug (post_name) */
-			$parent = get_post( $id );
-			$bre_page->parent = $parent->post_name != $post->post_name ? $parent->post_name : false;
+			$anc = array_map( 'get_post', array_reverse( (array) get_post_ancestors( $post ) ) );
+			$parents = array();
+			foreach ($anc as $parent) {
+				$obj = new stdClass();
+				$obj->id = $parent->ID;
+				$obj->title = $parent->post_title;
+				$obj->slug = $parent->post_name;
+				$obj->permalink = get_permalink( $parent );
+				$obj->type = $parent->post_type;
+				array_push( $parents, $obj );
+			}
+			$bre_page->parents = $parents ? $parents : false;
 
 			// show post content unless parameter is false
 			if ( $content === null || $show_content === true ) {
@@ -136,26 +142,6 @@ function bre_get_pages( WP_REST_Request $request ) {
 				} else {
 					$bre_page->media = false;
 				}
-			}
-
-			/**
-			 * Get Breadcrumbs if Breadcrumb NavXT is activated.
-			 */
-			if ( class_exists( 'breadcrumb_navxt' ) ) {
-				$breadRequest = new WP_REST_Request( 'GET', '/bcn/v1/post/' . get_the_ID() );
-				$breadResponse = rest_do_request( $breadRequest );
-
-				if ( $breadResponse->is_error() ) {
-					// Convert to a WP_Error object.
-					$error = $breadResponse->as_error();
-					$message = $breadResponse->get_error_message();
-					$error_data = $breadResponse->get_error_data();
-					$status = isset( $error_data['status'] ) ? $error_data['status'] : 500;
-					wp_die( printf( '<p>An error occurred: %s (%d)</p>', $message, $error_data ) );
-				}
-
-				$breadData = $breadResponse->jsonSerialize();
-				$bre_page->breadcrumbs = $breadData;
 			}
 
 			// Push the post to the main $post array

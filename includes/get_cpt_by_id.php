@@ -111,6 +111,24 @@ function bre_build_single_cpt_endpoints() {
                   $bre_cpt_post->media = false;
                 }
 
+				/*
+				*
+				* return parents if they exist
+				*
+				*/
+				$anc = array_map( 'get_post', array_reverse( (array) get_post_ancestors( $post ) ) );
+				$parents = array();
+				foreach ( $anc as $parent ) {
+					$obj = new stdClass();
+					$obj->id = $parent->ID;
+					$obj->title = $parent->post_title;
+					$obj->slug = $parent->post_name;
+					$obj->permalink = get_permalink( $parent );
+					$obj->type = $parent->post_type;
+					array_push( $parents, $obj );
+				}
+				$bre_cpt_post->parents = $parents ? $parents : false;
+
               }
 
               return $bre_cpt_post;

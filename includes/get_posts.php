@@ -160,25 +160,23 @@ function bre_get_posts( WP_REST_Request $request ) {
 				}
 			}
 
-			/**
-			 * Get Breadcrumbs if Breadcrumb NavXT is activated.
-			 */
-			if ( class_exists( 'breadcrumb_navxt' ) ) {
-				$breadRequest = new WP_REST_Request( 'GET', '/bcn/v1/post/' . get_the_ID() );
-				$breadResponse = rest_do_request( $breadRequest );
-
-				if ( $breadResponse->is_error() ) {
-					// Convert to a WP_Error object.
-					$error = $breadResponse->as_error();
-					$message = $breadResponse->get_error_message();
-					$error_data = $breadResponse->get_error_data();
-					$status = isset( $error_data['status'] ) ? $error_data['status'] : 500;
-					wp_die( printf( '<p>An error occurred: %s (%d)</p>', $message, $error_data ) );
-				}
-
-				$breadData = $breadResponse->jsonSerialize();
-				$bre_post->breadcrumbs = $breadData;
+			/*
+			*
+			* return parents if they exist
+			*
+			*/
+			$anc = array_map( 'get_post', array_reverse( (array) get_post_ancestors( $post ) ) );
+			$parents = array();
+			foreach ($anc as $parent) {
+				$obj = new stdClass();
+				$obj->id = $parent->ID;
+				$obj->title = $parent->post_title;
+				$obj->slug = $parent->post_name;
+				$obj->permalink = get_permalink( $parent );
+				$obj->type = $parent->post_type;
+				array_push( $parents, $obj );
 			}
+			$bre_post->parents = $parents ? $parents : false;
 
 			// Push the post to the main $post array
 			array_push( $posts, $bre_post );

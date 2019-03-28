@@ -63,15 +63,21 @@ function get_page_by_slug( WP_REST_Request $request ) {
 
 			/*
 			*
-			* return parent slug if it exists
+			* return parents if they exist
 			*
 			*/
-			$parents = get_post_ancestors( $post->ID );
-			/* Get the top Level page->ID count base 1, array base 0 so -1 */
-			$id = ($parents) ? $parents[ count( $parents ) - 1 ] : $post->ID;
-			/* Get the parent and set the $class with the page slug (post_name) */
-			$parent = get_post( $id );
-			$bre_page->parent = $parent->post_name != $post->post_name ? $parent->post_name : false;
+			$anc = array_map( 'get_post', array_reverse( (array) get_post_ancestors( $post ) ) );
+			$parents = array();
+			foreach ($anc as $parent) {
+				$obj = new stdClass();
+				$obj->id = $parent->ID;
+				$obj->title = $parent->post_title;
+				$obj->slug = $parent->post_name;
+				$obj->permalink = get_permalink( $parent );
+				$obj->type = $parent->post_type;
+				array_push( $parents, $obj );
+			}
+			$bre_page->parents = $parents ? $parents : false;
 
 			/*
 			*

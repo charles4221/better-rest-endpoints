@@ -111,6 +111,24 @@ function get_post_by_id( $data ) {
         $bre_post->media = false;
       }
 
+	  /*
+	  *
+	  * return parents if they exist
+	  *
+	  */
+	  $anc = array_map( 'get_post', array_reverse( (array) get_post_ancestors( $post ) ) );
+	  $parents = array();
+	  foreach ( $anc as $parent ) {
+		  $obj = new stdClass();
+		  $obj->id = $parent->ID;
+		  $obj->title = $parent->post_title;
+		  $obj->slug = $parent->post_name;
+		  $obj->permalink = get_permalink( $parent );
+		  $obj->type = $parent->post_type;
+		  array_push( $parents, $obj );
+	  }
+	  $bre_post->parents = $parents ? $parents : false;
+
       // Push the post to the main $post array
       return $bre_post;
 
