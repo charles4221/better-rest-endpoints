@@ -131,6 +131,14 @@ function get_post_by_slug( WP_REST_Request $request ) {
 			}
 			$bre_post->parents = $parents ? $parents : false;
 
+			/**
+			 * Calculate reading time for the article.
+			 */
+			$post_string = json_encode($bre_post);
+			$string_parts = preg_split('/\s+/', $post_string);
+			$word_count = sizeof($string_parts);
+			$bre_post->reading_time = round($word_count / 200);
+
 			// Push the post to the main $post array
 			return $bre_post;
 
