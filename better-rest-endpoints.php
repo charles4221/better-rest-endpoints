@@ -1,11 +1,11 @@
 <?php
 /*
 Plugin Name:  Better Rest Endpoints
-Plugin URI:   https://github.com/factor1/better-rest-endpoints/
+Plugin URI:   https://github.com/charles4221/better-rest-endpoints/
 Description:  Serves up slimmer WordPress Rest API endpoints, with some great enhancements.
-Version:      1.5.2
-Author:       Eric Stout
-Author URI:   https://ericwstout.com/
+Version:      ATec-1.5.2
+Author:       Charles Harwood
+Author URI:   https://github.com/charles4221/
 License:      GPL3
 License URI:  https://www.gnu.org/licenses/gpl-3.0.html
 Text Domain:  better-rest-endpoints
