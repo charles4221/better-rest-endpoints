@@ -3,7 +3,7 @@
 Plugin Name:  Better Rest Endpoints
 Plugin URI:   https://github.com/charles4221/better-rest-endpoints/
 Description:  Serves up slimmer WordPress Rest API endpoints, with some great enhancements.
-Version:      ATec-1.5.2
+Version:      999.1.5.2
 Author:       Charles Harwood
 Author URI:   https://github.com/charles4221/
 License:      GPL3
