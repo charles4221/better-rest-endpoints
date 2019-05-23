@@ -66,6 +66,8 @@ function bre_get_pages( WP_REST_Request $request ) {
 			$bre_page->title = get_the_title();
 			$bre_page->slug = $post->post_name;
 			$bre_page->permalink = $permalink;
+			$bre_page->date = get_the_date( 'c' );
+			$bre_page->date_modified = get_the_modified_date( 'c' );
 
 			/*
 			*
