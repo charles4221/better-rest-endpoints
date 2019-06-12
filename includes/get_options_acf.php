@@ -34,9 +34,19 @@ function get_options_acf_all(){
     // Only run if we have ACF installed
     if( !is_plugin_active('advanced-custom-fields-pro/acf.php') && !is_plugin_active('advanced-custom-fields/acf.php') ) {
         return array();
-    }
+	}
+	
+	// get fields
+	$acf_options = get_fields('options');
 
-    return get_fields('options');
+	// if we have fields
+	if ( $acf_options ) {
+		// Modify all post object responses.
+		array_walk_recursive( $acf_options, 'deep_modify_acf_post_objects' );
+		return $acf_options;
+	} else {
+		return array();
+	}
 }
 
 /**
