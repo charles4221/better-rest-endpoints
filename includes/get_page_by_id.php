@@ -58,7 +58,7 @@ function get_page_by_id( WP_REST_Request $request ) {
 			*/
 			$anc = array_map( 'get_post', array_reverse( (array) get_post_ancestors( $post ) ) );
 			$parents = array();
-			foreach ($anc as $parent) {
+			foreach ( $anc as $parent ) {
 				$obj = new stdClass();
 				$obj->id = $parent->ID;
 				$obj->title = $parent->post_title;
@@ -88,7 +88,8 @@ function get_page_by_id( WP_REST_Request $request ) {
 			* get possible thumbnail sizes and urls
 			*
 			*/
-			$thumbnail_names = array_push( get_intermediate_image_sizes(), 'full' );
+			$thumbnail_names = get_intermediate_image_sizes();
+			array_push( get_intermediate_image_sizes(), 'full' );
 			$bre_thumbnails = new stdClass();
 
 			if ( has_post_thumbnail() ) {

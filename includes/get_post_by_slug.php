@@ -100,7 +100,8 @@ function get_post_by_slug( WP_REST_Request $request ) {
 			* get possible thumbnail sizes and urls
 			*
 			*/
-			$thumbnail_names = array_push( get_intermediate_image_sizes(), 'full' );
+			$thumbnail_names = get_intermediate_image_sizes();
+			array_push( get_intermediate_image_sizes(), 'full' );
 			$bre_thumbnails = new stdClass();
 
 			if ( has_post_thumbnail() ) {
@@ -134,10 +135,10 @@ function get_post_by_slug( WP_REST_Request $request ) {
 			/**
 			 * Calculate reading time for the article.
 			 */
-			$post_string = json_encode($bre_post);
-			$string_parts = preg_split('/\s+/', $post_string);
-			$word_count = sizeof($string_parts);
-			$bre_post->reading_time = round($word_count / 200);
+			$post_string = json_encode( $bre_post );
+			$string_parts = preg_split( '/\s+/', $post_string );
+			$word_count = sizeof( $string_parts );
+			$bre_post->reading_time = round( $word_count / 200 );
 
 			// Push the post to the main $post array
 			return $bre_post;

@@ -8,146 +8,146 @@
  */
 
 function bre_build_single_cpt_endpoints() {
-  if( bre_get_cpts() ) {
+	if ( bre_get_cpts() ) {
 
-    // store what custom post types we have
-    $cpt_collection = bre_get_cpts();
+		// store what custom post types we have
+		$cpt_collection = bre_get_cpts();
 
-    foreach ($cpt_collection as $key => $cpt) {
+		foreach ( $cpt_collection as $key => $cpt ) {
 
-      /*
-       *
-       * Register Rest API Endpoint
-       *
-       */
-      register_rest_route( 'better-rest-endpoints/v1', '/'.$cpt.'/(?P<id>\d+)', array(
-        'methods' => 'GET',
-        'callback' => function ( WP_REST_Request $request ) use ($cpt) {
+			/*
+			*
+			* Register Rest API Endpoint
+			*
+			*/
+			register_rest_route(
+				'better-rest-endpoints/v1', '/' . $cpt . '/(?P<id>\d+)', array(
+					'methods' => 'GET',
+					'callback' => function ( WP_REST_Request $request ) use ( $cpt ) {
 
-            // setup parameters
-            $post_id = $request['id'];
+						// setup parameters
+						$post_id = $request['id'];
 
-            // WP_Query Arguments
-            $args = array(
-              'post_type'     => $cpt,
-              'p'             => $post_id,
-            );
+						// WP_Query Arguments
+						$args = array(
+							'post_type'     => $cpt,
+							'p'             => $post_id,
+						);
 
-            // The Query
-            $query = new WP_Query( $args );
+						// The Query
+						$query = new WP_Query( $args );
 
-            if( $query->have_posts() ){
+						if ( $query->have_posts() ) {
 
-              // setup post object
-              $bre_cpt_post = new stdClass();
+							// setup post object
+							$bre_cpt_post = new stdClass();
 
-              while( $query->have_posts() ) {
-                $query->the_post();
+							while ( $query->have_posts() ) {
+								$query->the_post();
 
-                global $post;
+								global $post;
 
-                // get post data
-                $permalink = get_permalink();
-                $bre_cpt_post->id = get_the_ID();
-                $bre_cpt_post->title = get_the_title();
-                $bre_cpt_post->slug = $post->post_name;
-                $bre_cpt_post->permalink = $permalink;
-                $bre_cpt_post->date = get_the_date('c');
-                $bre_cpt_post->date_modified = get_the_modified_date('c');
-                $bre_cpt_post->excerpt = get_the_excerpt();
-                $bre_cpt_post->content = apply_filters('the_content', get_the_content());
-                $bre_cpt_post->author = esc_html__(get_the_author(), 'text_domain');
-                $bre_cpt_post->author_id = get_the_author_meta('ID');
-                $bre_cpt_post->author_nicename = get_the_author_meta('user_nicename');
+								// get post data
+								$permalink = get_permalink();
+								$bre_cpt_post->id = get_the_ID();
+								$bre_cpt_post->title = get_the_title();
+								$bre_cpt_post->slug = $post->post_name;
+								$bre_cpt_post->permalink = $permalink;
+								$bre_cpt_post->date = get_the_date( 'c' );
+								$bre_cpt_post->date_modified = get_the_modified_date( 'c' );
+								$bre_cpt_post->excerpt = get_the_excerpt();
+								$bre_cpt_post->content = apply_filters( 'the_content', get_the_content() );
+								$bre_cpt_post->author = esc_html__( get_the_author(), 'text_domain' );
+								$bre_cpt_post->author_id = get_the_author_meta( 'ID' );
+								$bre_cpt_post->author_nicename = get_the_author_meta( 'user_nicename' );
 
-                /*
-                 *
-                 * get the terms
-                 *
-                 */
-                if( get_object_taxonomies($cpt) ){
-                  $cpt_taxonomies = get_object_taxonomies($cpt, 'names');
+								/*
+								*
+								* get the terms
+								*
+								*/
+								if ( get_object_taxonomies( $cpt ) ) {
+									$cpt_taxonomies = get_object_taxonomies( $cpt, 'names' );
 
-                  $bre_cpt_post->terms = array();
+									$bre_cpt_post->terms = array();
 
-                  foreach ($cpt_taxonomies as $cpt_taxonomy) {
-                    array_push($bre_cpt_post->terms, get_the_terms(get_the_ID(), $cpt_taxonomy));
-                  }
+									foreach ( $cpt_taxonomies as $cpt_taxonomy ) {
+										array_push( $bre_cpt_post->terms, get_the_terms( get_the_ID(), $cpt_taxonomy ) );
+									}
+								} else {
+											$bre_cpt_post->terms = array();
+								}
 
-                } else {
-                  $bre_cpt_post->terms = array();
-                }
+								/*
+								*
+								* return acf fields if they exist
+								*
+								*/
+								$bre_cpt_post->acf = bre_get_acf();
 
+								/*
+								*
+								* return Yoast SEO fields if they exist
+								*
+								*/
+								$bre_cpt_post->yoast = bre_get_yoast( $bre_cpt_post->id );
 
-                /*
-                 *
-                 * return acf fields if they exist
-                 *
-                 */
-                $bre_cpt_post->acf = bre_get_acf();
+								/*
+								*
+								* get possible thumbnail sizes and urls
+								*
+								*/
+								$thumbnail_names = get_intermediate_image_sizes();
+								array_push( get_intermediate_image_sizes(), 'full' );
+								$bre_thumbnails = new stdClass();
 
-                /*
-                 *
-                 * return Yoast SEO fields if they exist
-                 *
-                 */
-                $bre_cpt_post->yoast = bre_get_yoast( $bre_cpt_post->id );
+								if ( has_post_thumbnail() ) {
+									foreach ( $thumbnail_names as $key => $name ) {
+										$bre_thumbnails->$name = esc_url( get_the_post_thumbnail_url( $post->ID, $name ) );
+									}
 
-                /*
-                 *
-                 * get possible thumbnail sizes and urls
-                 *
-                 */
-                $thumbnail_names = array_push( get_intermediate_image_sizes(), 'full' );
-                $bre_thumbnails = new stdClass();
+									$bre_cpt_post->media = $bre_thumbnails;
+								} else {
+									$bre_cpt_post->media = false;
+								}
 
-                if( has_post_thumbnail() ){
-                  foreach ($thumbnail_names as $key => $name) {
-                    $bre_thumbnails->$name = esc_url(get_the_post_thumbnail_url($post->ID, $name));
-                  }
+								/*
+								*
+								* return parents if they exist
+								*
+								*/
+								$anc = array_map( 'get_post', array_reverse( (array) get_post_ancestors( $post ) ) );
+								$parents = array();
+								foreach ( $anc as $parent ) {
+									$obj = new stdClass();
+									$obj->id = $parent->ID;
+									$obj->title = $parent->post_title;
+									$obj->slug = $parent->post_name;
+									$obj->permalink = get_permalink( $parent );
+									$obj->type = $parent->post_type;
+									array_push( $parents, $obj );
+								}
+								$bre_cpt_post->parents = $parents ? $parents : false;
 
-                  $bre_cpt_post->media = $bre_thumbnails;
-                } else {
-                  $bre_cpt_post->media = false;
-                }
+							}
 
-				/*
-				*
-				* return parents if they exist
-				*
-				*/
-				$anc = array_map( 'get_post', array_reverse( (array) get_post_ancestors( $post ) ) );
-				$parents = array();
-				foreach ( $anc as $parent ) {
-					$obj = new stdClass();
-					$obj->id = $parent->ID;
-					$obj->title = $parent->post_title;
-					$obj->slug = $parent->post_name;
-					$obj->permalink = get_permalink( $parent );
-					$obj->type = $parent->post_type;
-					array_push( $parents, $obj );
-				}
-				$bre_cpt_post->parents = $parents ? $parents : false;
+							return $bre_cpt_post;
+						} else {
+							// if no post is found
+							return array();
+						}
 
-              }
+						// reset post data
+						wp_reset_postdata();
 
-              return $bre_cpt_post;
-            } else {
-              // if no post is found
-              return array();
-            }
+					},
+				)
+			);
 
-            // reset post data
-            wp_reset_postdata();
-
-          }
-      ));
-
-    }
-
-  } else {
-    return array();
-  }
+		}
+	} else {
+		  return array();
+	}
 }
 
 /*
