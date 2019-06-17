@@ -138,7 +138,7 @@ function bre_build_custom_tax_endpoint() {
                     */
 
                    if( $media === null || $show_media === true ) {
-                     $thumbnail_names = get_intermediate_image_sizes();
+                     $thumbnail_names = array_push( get_intermediate_image_sizes(), 'full' );
                      $bre_thumbnails = new stdClass();
 
                      if( has_post_thumbnail() ){
