@@ -89,7 +89,7 @@ function get_page_by_id( WP_REST_Request $request ) {
 			*
 			*/
 			$thumbnail_names = get_intermediate_image_sizes();
-			array_push( get_intermediate_image_sizes(), 'full' );
+			array_push( $thumbnail_names, 'full' );
 			$bre_thumbnails = new stdClass();
 
 			if ( has_post_thumbnail() ) {

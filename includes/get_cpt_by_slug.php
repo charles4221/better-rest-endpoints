@@ -98,7 +98,7 @@ function bre_build_single_cpt_endpoints_slug() {
 								*
 								*/
 								$thumbnail_names = get_intermediate_image_sizes();
-								array_push( get_intermediate_image_sizes(), 'full' );
+								array_push( $thumbnail_names, 'full' );
 								$bre_thumbnails = new stdClass();
 
 								if ( has_post_thumbnail() ) {
